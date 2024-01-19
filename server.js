@@ -1,9 +1,15 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const cookieParser= require('cookie-parser');
+const methodoverride = require('method-override')
+var errorHandler = require('errorhandler')
+
 
 require('./config/config');
 require('./db_connection/mongo_connection');
+require('./db_connection/pg_connection');
+const db = require('./pg_model/index');
 const { SERVER_PORT } = process.env;
 
 const app = express();
@@ -11,9 +17,24 @@ const app = express();
 
 app.use(cors());
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser());
 // parse application/json
-app.use(bodyParser.json())
+app.use(bodyParser.json());
+app.use(methodoverride());
+// ...
+app.use(errorHandler({ dumpExceptions: true, showStack: true })); 
 app.use(['/api/v1', '/api/v2'],require('./config/router.config'));
+
+  process.on('unhandledRejection', (reason, promise) => {
+    console.log('Unhandled Rejection at:', reason.stack || reason)
+    // Recommended: send the information to sentry.io
+    // or whatever crash reporting service you use
+  });
+
+//synchronizing the database and forcing it to false so we dont lose data
+db.sequelize.sync({ force: true }).then(() => {
+    console.log("db has been re sync")
+})
 
 
 app.listen(SERVER_PORT, () => {
