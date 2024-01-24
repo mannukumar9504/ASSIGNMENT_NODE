@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const cookieParser= require('cookie-parser');
 const methodoverride = require('method-override')
 var errorHandler = require('errorhandler')
+var { ValidationError } = require('express-validation');
 
 
 require('./config/config');
@@ -25,14 +26,22 @@ app.use(methodoverride());
 app.use(errorHandler({ dumpExceptions: true, showStack: true })); 
 app.use(['/api/v1', '/api/v2'],require('./config/router.config'));
 
-  process.on('unhandledRejection', (reason, promise) => {
-    console.log('Unhandled Rejection at:', reason.stack || reason)
-    // Recommended: send the information to sentry.io
-    // or whatever crash reporting service you use
-  });
+app.use(function(err, req, res, next) {
+    if (err instanceof ValidationError) {
+      return res.status(err.statusCode).json({message: err?.details?.body[0].message});
+    }
+   
+    return res.status(500).json(err)
+  })
+
+//   process.on('unhandledRejection', (reason, promise) => {
+//     console.log('Unhandled Rejection at:', reason.stack || reason)
+//     // Recommended: send the information to sentry.io
+//     // or whatever crash reporting service you use
+//   });
 
 //synchronizing the database and forcing it to false so we dont lose data
-db.sequelize.sync({ force: true }).then(() => {
+db.sequelize.sync({ force: false }).then(() => {
     console.log("db has been re sync")
 })
 

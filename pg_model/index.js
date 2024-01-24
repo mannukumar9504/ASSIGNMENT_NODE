@@ -15,6 +15,8 @@ db.sequelize = sequelize
 
 //connecting to model
 db.users = require('./models/user') (sequelize, DataTypes);
+db.sessions = require('./models/session') (sequelize, DataTypes);
+
 
 //exporting the module
 module.exports = db

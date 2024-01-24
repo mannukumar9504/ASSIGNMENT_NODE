@@ -16,4 +16,5 @@ client.connect((err) => {
         throw err;
     }
 
-})
+}) 
+module.exports = client;

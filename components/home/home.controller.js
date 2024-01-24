@@ -32,10 +32,9 @@ const addQuestion = async (req, res) => {
         const result = await question.insertMany(questions, { ordered: true })
 
         if (result?.insertedIds) {
-            new Response(res).BAD_REQUEST_RESPONSE({ "message": "Questions has been yesterday!" });
-            new Response(res).SUCCESS_RESPONSE({ 'message': 'Questions has been added successfully' });
+            new Response(res).SUCCESS_RESPONSE({ "message": "Questions has been added successfully." });
         } else {
-            new Response(res).BAD_REQUEST_RESPONSE({ "message": "Questions has been yesterday!" });
+            new Response(res).BAD_REQUEST_RESPONSE({ "message": "Questions has not been added." });
         }
     } catch (err) {
         logger.errorLoggging(err);
